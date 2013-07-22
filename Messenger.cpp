@@ -379,7 +379,7 @@ class MessengerServer: public Poco::Util::ServerApplication
 	/// (MessengerServer[.exe]), you must also create a copy of the configuration
 	/// file named MessengerServer.properties. In the configuration file, you
 	/// can specify the port on which the server is listening (default
-	/// 9911) and some other simple configurations
+	/// 9900) and some other simple configurations
 	///
 	/// To test the MessengerServer you can use any telnet client (telnet localhost 9900).
 	/// write your user name press enter and to send message you need to write the username of the person you want to chat following by the message divided by a space.
