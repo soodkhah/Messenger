@@ -28,14 +28,12 @@ using Poco::DateTimeFormatter;
 using Poco::DateTimeFormat;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
-//using Poco::Util::Option;
-//using Poco::Util::OptionSet;
+
 
 
 
 struct MessageQueue{
 	std::string from;
-	//std::string to;
 	std::string budy;
 	MessageQueue *link ;
 };
@@ -49,7 +47,6 @@ struct Person{
 std::string Refinestring(std::string temp)
 {
 	std::string refined="";
-	//char tempchar;
 for(int i=0;i<temp.length();i++)
 	{  		if (((char) temp[i])!='\b')
 		refined=refined+((char) temp[i]);
@@ -63,7 +60,6 @@ return refined;
 class MessagesClass 
 {
 private:
-	//MessageQueue *Head ;
 	Person *PersonHead;
 public:
 	MessagesClass()
@@ -73,17 +69,28 @@ public:
 		PersonHead->Next=NULL;
 		//Head->link=NULL;
 	}
-	void OnlinePerson(std::string Name)
+	bool OnlinePerson(std::string Name)
 	{
 		Person *TempPerson;
 		bool Done=FALSE;
+		bool Repetetive=FALSE;
 		TempPerson=PersonHead;
 		while (TempPerson->Next!=NULL)
 		{
 			if (TempPerson->Next->name.compare(Name)==0)
 			{
-				TempPerson->Next->available=TRUE;
-				Done=TRUE;
+				if(TempPerson->Next->available==FALSE)
+				{
+					Done=TRUE;
+					TempPerson->Next->available=TRUE;
+					break;
+				}
+				else
+				{
+					Done=TRUE;
+					Repetetive=TRUE;
+					break;
+				}
 			}
 			TempPerson=TempPerson->Next;
 		}
@@ -95,8 +102,12 @@ public:
 			TempPerson->Next->Next=NULL;
 			TempPerson->Next->FirstMessage=new MessageQueue;
 			TempPerson->Next->FirstMessage->link=NULL;
+			return TRUE;
 		}
-
+		if (Done==TRUE && Repetetive==FALSE)
+			return TRUE;
+		else
+			return FALSE;
 	}
 	void OfflinePerson(std::string Name)
 	{
@@ -260,18 +271,25 @@ public:
 			}
 			Username=Refinestring(Username+'\0');
 			app.logger().information("This connection's name is: " + Username);
-			MessagePool->OnlinePerson(Username);
+			if (MessagePool->OnlinePerson(Username))
+			{
 			MessagePool->AddMessageForAll(Username," I am online.\r\n");
 			reply.clear();
 			reply="Welcome " + Username +" "+ MessagePool->AllOnlineUsers()+"\r\n";
 			socket().sendBytes(reply.data(), (int) reply.length());
-			//Username=reply;
-			//Username[reply.length()-2]='\0';
+			}
+			else
+			{
+				reply.clear();
+			reply="User " + Username +" is online via another terminal, please close the other one before connecting via another terminal"+ +"\r\n";
+			socket().sendBytes(reply.data(), (int) reply.length());
+			return;
+			}
+
 			this->socket().setBlocking(FALSE);
 			temp1[0]=' ';
 			Poco::Net::Socket::SocketList Readers,Writers,Exceptions;
 			Poco::Timespan TimeSpan=0;
-			//			Readers.push_back(this->socket());
 			while (TRUE)
 			{   Poco::Thread::sleep(15);
 				Readers.push_back(this->socket());
@@ -424,7 +442,7 @@ protected:
 			//some tests for the MessageQueue and PersonQueue 
 			//for (int i=1;i<100;i++)
 			//	{
-			//		MessagePool->OnlinePerson(to_string(i)+'\0');
+			//		assert (TRUE==MessagePool->OnlinePerson(to_string(i)+'\0'));
 			//		for (int j=1;j<100;j++)
 			//		MessagePool->AddMessage(to_string(j)+'\0',to_string(i)+'\0',"Hello budddy how are you"+to_string(j*i)+"\r\n"+'\0');
 			//	}
