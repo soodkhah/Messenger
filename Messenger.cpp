@@ -302,6 +302,18 @@ public:
 					{
 						StrTo=StrTo + temp1[0];
 					}
+					else
+					{
+						//this is the case the remote connection is closed without writing "exit".Such as network error/Disconnect/ client crash, client closes the chat page. 
+
+							app.logger().information(Username + "Left The chatroom");
+							MessagePool->OfflinePerson(Username);
+							reply.clear();
+							reply="I have gone offline, Goodbye everybody\r\n";
+							MessagePool->AddMessageForAll(Username,reply);
+							return;
+					}
+
 					
 					if (temp1[0]=='\n')
 					{	StrTo=Refinestring(StrTo);
